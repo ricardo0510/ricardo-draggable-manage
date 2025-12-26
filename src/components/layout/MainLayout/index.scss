@@ -1,0 +1,11 @@
+.main-layout {
+  min-height: 100vh;
+
+  .main-content {
+    margin: 24px;
+    padding: 24px;
+    background-color: #fff;
+    border-radius: 8px;
+    min-height: calc(100vh - 112px);
+  }
+}

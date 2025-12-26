@@ -1,0 +1,21 @@
+.page-container {
+  .page-container-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+
+    .page-container-title {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.85);
+    }
+
+    .page-container-extra {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+}

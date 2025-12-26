@@ -1,0 +1,15 @@
+.configurable-form {
+  &.ant-form-inline {
+    .ant-form-item {
+      margin-right: 16px;
+      margin-bottom: 0;
+    }
+  }
+
+  &.ant-form-horizontal,
+  &.ant-form-vertical {
+    .ant-form-item {
+      margin-bottom: 16px;
+    }
+  }
+}
