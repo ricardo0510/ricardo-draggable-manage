@@ -1,5 +1,14 @@
-import React, { useMemo, useState } from "react";
-import { Table, Button, Space, Tag, Popconfirm, Input, Select } from "antd";
+import React, { useMemo, useState, useEffect } from "react";
+import {
+  Table,
+  Button,
+  Space,
+  Tag,
+  Popconfirm,
+  Input,
+  Select,
+  message,
+} from "antd";
 import {
   PlusOutlined,
   SearchOutlined,
@@ -18,22 +27,34 @@ import ConfigurableForm, {
   type FormItemConfig,
 } from "@/components/common/ConfigurableForm";
 import PageContainer from "@/components/common/PageContainer";
+import * as fileServices from "./services";
 import "./index.scss";
 
 const FileSystemManage: React.FC = () => {
-  const {
-    items,
-    searchTerm,
-    filterType,
-    setSearchTerm,
-    setFilterType,
-    addItem,
-    updateItem,
-    deleteItem,
-  } = useFileSystemStore();
+  const { searchTerm, filterType, setSearchTerm, setFilterType } =
+    useFileSystemStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<FileSystemItem | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [filesList, setFilesList] = useState<FileSystemItem[]>([]);
+
+  // 加载文件列表
+  useEffect(() => {
+    loadFiles();
+  }, []);
+
+  const loadFiles = async () => {
+    setLoading(true);
+    try {
+      const files = await fileServices.getFiles();
+      setFilesList(files);
+    } catch (error: any) {
+      message.error(error.message || "加载文件列表失败");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // 定义表单配置项
   const formItems: FormItemConfig[] = [
@@ -70,14 +91,14 @@ const FileSystemManage: React.FC = () => {
   ];
 
   const itemsList = useMemo(() => {
-    return Object.values(items).filter((item: FileSystemItem) => {
+    return filesList.filter((item: FileSystemItem) => {
       const matchesSearch =
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.id.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesType = filterType === "all" || item.type === filterType;
       return matchesSearch && matchesType;
     });
-  }, [items, searchTerm, filterType]);
+  }, [filesList, searchTerm, filterType]);
 
   const getIconForType = (type: ItemType) => {
     switch (type) {
@@ -174,7 +195,7 @@ const FileSystemManage: React.FC = () => {
           />
           <Popconfirm
             title="确定要删除这个项目吗?"
-            onConfirm={() => deleteItem(record.id)}
+            onConfirm={() => handleDelete(record.id)}
             okText="确定"
             cancelText="取消"
           >
@@ -195,21 +216,44 @@ const FileSystemManage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleSave = (itemData: Partial<FileSystemItem>) => {
-    if (editingItem) {
-      updateItem(editingItem.id, itemData);
-    } else {
-      const newItem: FileSystemItem = {
-        id: crypto.randomUUID(),
-        parentId: itemData.parentId || "root",
-        name: itemData.name || "Untitled",
-        type: itemData.type || "folder",
-        position: itemData.position || { x: 0, y: 0 },
-        ...itemData,
-      };
-      addItem(newItem);
+  const handleSave = async (itemData: Partial<FileSystemItem>) => {
+    setLoading(true);
+    try {
+      if (editingItem) {
+        // 更新文件
+        await fileServices.updateFile(editingItem.id, itemData);
+        message.success("更新成功");
+      } else {
+        // 创建文件
+        const createData: Partial<FileSystemItem> = {
+          parentId: itemData.parentId || "root",
+          name: itemData.name || "Untitled",
+          type: itemData.type || "folder",
+          ...itemData,
+        };
+        await fileServices.createFile(createData);
+        message.success("创建成功");
+      }
+      setIsModalOpen(false);
+      loadFiles(); // 重新加载列表
+    } catch (error: any) {
+      message.error(error.message || "操作失败");
+    } finally {
+      setLoading(false);
     }
-    setIsModalOpen(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    setLoading(true);
+    try {
+      await fileServices.deleteFile(id);
+      message.success("删除成功");
+      loadFiles(); // 重新加载列表
+    } catch (error: any) {
+      message.error(error.message || "删除失败");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -237,6 +281,7 @@ const FileSystemManage: React.FC = () => {
         columns={columns}
         dataSource={itemsList}
         rowKey="id"
+        loading={loading}
         pagination={{
           pageSize: 10,
           showSizeChanger: true,

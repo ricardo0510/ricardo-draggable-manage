@@ -24,18 +24,19 @@ const Sidebar: React.FC = () => {
       label: "仪表盘",
     },
     {
+      key: "/menu",
+      icon: <FolderOutlined />,
+      label: "菜单管理",
+    },
+    {
       key: "/file-system",
       icon: <FolderOutlined />,
       label: "文件系统",
     },
     {
-      key: "/user",
+      key: "/user-manage",
       icon: <AppstoreOutlined />,
       label: "用户管理",
-      children: [
-        { key: "/user/list", label: "用户列表" },
-        { key: "/user/detail", label: "用户详情" },
-      ],
     },
     {
       key: "/setting",

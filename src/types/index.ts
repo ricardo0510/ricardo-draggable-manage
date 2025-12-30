@@ -3,7 +3,7 @@ export * from "./models/fileSystem";
 // 通用类型
 export interface ApiResponse<T = any> {
   code: number;
-  message: string;
+  msg: string;
   data: T;
 }
 

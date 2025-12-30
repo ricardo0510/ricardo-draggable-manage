@@ -13,7 +13,7 @@ interface RequestConfig extends RequestInit {
 async function request<T = any>(
   url: string,
   config: RequestConfig = {}
-): Promise<ApiResponse<T>> {
+): Promise<T> {
   const { params, headers, ...restConfig } = config;
 
   // 处理查询参数
@@ -42,12 +42,20 @@ async function request<T = any>(
       },
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    const result: ApiResponse<T> = await response.json();
 
-    const data = await response.json();
-    return data;
+    // 处理业务状态码
+    if (result.code === 0) {
+      return result.data as T; // 自动解包 data 字段
+    } else if (result.code === 401) {
+      // 未授权,清除 token 并跳转登录
+      localStorage.removeItem("access_token");
+      window.location.href = "/login";
+      throw new Error(result.msg || "未授权,请重新登录");
+    } else {
+      // 其他业务错误
+      throw new Error(result.msg || "请求失败");
+    }
   } catch (error) {
     console.error("Request error:", error);
     throw error;
@@ -69,6 +77,13 @@ export const http = {
     request<T>(url, {
       ...config,
       method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  patch: <T = any>(url: string, data?: any, config?: RequestConfig) =>
+    request<T>(url, {
+      ...config,
+      method: "PATCH",
       body: JSON.stringify(data),
     }),
 

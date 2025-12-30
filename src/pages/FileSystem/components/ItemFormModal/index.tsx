@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from "react";
-import {
-  Form,
-  Input,
-  Select,
-  InputNumber,
-  Button,
-  Space,
-  Modal,
-  Upload,
-  message,
-} from "antd";
-import { PlusOutlined, LoadingOutlined } from "@ant-design/icons";
-import type { UploadChangeParam, UploadFile } from "antd/es/upload";
+import { Form, Input, Select, InputNumber, Button, Space, Modal } from "antd";
 import { FileSystemItem, ItemType } from "@/types/models/fileSystem";
+import ImageUploader from "@/components/common/ImageUploader";
 import "./index.scss";
 
 const { TextArea } = Input;
@@ -35,8 +24,6 @@ const ItemFormModal: React.FC<ItemFormModalProps> = ({
   const [itemType, setItemType] = useState<ItemType>(
     editingItem?.type || "folder"
   );
-  const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>();
 
   useEffect(() => {
     if (editingItem) {
@@ -55,46 +42,6 @@ const ItemFormModal: React.FC<ItemFormModalProps> = ({
       });
     }
   }, [editingItem, form]);
-
-  // 处理图片上传前的验证
-  const beforeUpload = (file: File) => {
-    const isJpgOrPng =
-      file.type === "image/jpeg" ||
-      file.type === "image/png" ||
-      file.type === "image/svg+xml";
-    if (!isJpgOrPng) {
-      message.error("只能上传 JPG/PNG/SVG 格式的图片!");
-      return false;
-    }
-    const isLt2M = file.size / 1024 / 1024 < 2;
-    if (!isLt2M) {
-      message.error("图片大小不能超过 2MB!");
-      return false;
-    }
-    return true;
-  };
-
-  // 将图片转换为base64
-  const getBase64 = (img: File, callback: (url: string) => void) => {
-    const reader = new FileReader();
-    reader.addEventListener("load", () => callback(reader.result as string));
-    reader.readAsDataURL(img);
-  };
-
-  // 处理上传变化
-  const handleUploadChange = (info: UploadChangeParam<UploadFile>) => {
-    if (info.file.status === "uploading") {
-      setLoading(true);
-      return;
-    }
-    if (info.file.status === "done" || info.file.originFileObj) {
-      getBase64(info.file.originFileObj as File, (url) => {
-        setLoading(false);
-        setImageUrl(url);
-        form.setFieldValue("icon", url);
-      });
-    }
-  };
 
   const handleSubmit = (values: any) => {
     const formData: Partial<FileSystemItem> = {
@@ -170,30 +117,8 @@ const ItemFormModal: React.FC<ItemFormModalProps> = ({
             <Input placeholder="folder, file, etc." />
           </Form.Item>
 
-          <Form.Item label="上传图标">
-            <Upload
-              name="avatar"
-              listType="picture-card"
-              className="avatar-uploader"
-              showUploadList={false}
-              beforeUpload={beforeUpload}
-              onChange={handleUploadChange}
-              customRequest={({ onSuccess }) => {
-                // 自定义上传,直接返回成功
-                setTimeout(() => {
-                  onSuccess?.("ok");
-                }, 0);
-              }}
-            >
-              {imageUrl ? (
-                <img src={imageUrl} alt="icon" style={{ width: "100%" }} />
-              ) : (
-                <div>
-                  {loading ? <LoadingOutlined /> : <PlusOutlined />}
-                  <div style={{ marginTop: 8 }}>上传图标</div>
-                </div>
-              )}
-            </Upload>
+          <Form.Item label="上传图标" name="icon">
+            <ImageUploader />
           </Form.Item>
 
           <Space style={{ width: "100%" }}>
