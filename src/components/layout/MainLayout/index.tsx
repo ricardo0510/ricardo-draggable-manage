@@ -1,11 +1,11 @@
-import React from "react";
-import { Layout } from "antd";
-import { Outlet } from "react-router-dom";
-import Sidebar from "../Sidebar";
-import Header from "../Header";
-import "./index.scss";
+import React from 'react'
+import { Layout } from 'antd'
+import { Outlet } from 'react-router-dom'
+import Sidebar from '../Sidebar'
+import Header from '../Header'
+import './index.scss'
 
-const { Content } = Layout;
+const { Content } = Layout
 
 const MainLayout: React.FC = () => {
   return (
@@ -18,7 +18,7 @@ const MainLayout: React.FC = () => {
         </Content>
       </Layout>
     </Layout>
-  );
-};
+  )
+}
 
-export default MainLayout;
+export default MainLayout

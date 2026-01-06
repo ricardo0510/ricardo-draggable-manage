@@ -13,43 +13,41 @@
 ## 基础用法
 
 ```tsx
-import ConfigurableForm, {
-  type FormItemConfig,
-} from "@/components/common/ConfigurableForm";
-import { Input, Select } from "antd";
+import ConfigurableForm, { type FormItemConfig } from '@/components/common/ConfigurableForm'
+import { Input, Select } from 'antd'
 
 const formItems: FormItemConfig[] = [
   {
-    name: "searchTerm",
+    name: 'searchTerm',
     render: (form) => (
       <Input
         placeholder="搜索..."
         onBlur={(e) => {
-          form.setFieldValue("searchTerm", e.target.value);
-          form.submit(); // 触发onChange
+          form.setFieldValue('searchTerm', e.target.value)
+          form.submit() // 触发onChange
         }}
       />
-    ),
+    )
   },
   {
-    name: "category",
-    title: "分类", // 可选的标签
+    name: 'category',
+    title: '分类', // 可选的标签
     render: () => (
       <Select placeholder="选择分类">
         <Select.Option value="all">全部</Select.Option>
         <Select.Option value="option1">选项1</Select.Option>
       </Select>
-    ),
-  },
-];
+    )
+  }
+]
 
-<ConfigurableForm
+;<ConfigurableForm
   items={formItems}
-  initialValues={{ searchTerm: "", category: "all" }}
+  initialValues={{ searchTerm: '', category: 'all' }}
   onChange={(values) => {
-    console.log("表单值变更:", values);
+    console.log('表单值变更:', values)
   }}
-/>;
+/>
 ```
 
 ## 完整示例
@@ -165,21 +163,21 @@ const formItems: FormItemConfig[] = [
 ```tsx
 const formItems: FormItemConfig[] = [
   {
-    name: "searchTerm",
+    name: 'searchTerm',
     render: (form) => (
       <Input
         prefix={<SearchOutlined />}
         placeholder="搜索名称或ID..."
         style={{ width: 300 }}
         onBlur={(e) => {
-          form.setFieldValue("searchTerm", e.target.value);
-          form.submit();
+          form.setFieldValue('searchTerm', e.target.value)
+          form.submit()
         }}
       />
-    ),
+    )
   },
   {
-    name: "filterType",
+    name: 'filterType',
     render: () => (
       <Select style={{ width: 200 }} placeholder="选择类型">
         <Select.Option value="all">全部</Select.Option>
@@ -188,9 +186,9 @@ const formItems: FormItemConfig[] = [
         <Select.Option value="web">Web</Select.Option>
         <Select.Option value="widget">Widget</Select.Option>
       </Select>
-    ),
-  },
-];
+    )
+  }
+]
 ```
 
 ## 设计理念

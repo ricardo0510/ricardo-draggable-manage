@@ -1,6 +1,6 @@
 export interface DesktopLayout {
-  desktopOrder: string[];
+  desktopOrder: string[]
   folderOrders: {
-    [folderId: string]: string[];
-  };
+    [folderId: string]: string[]
+  }
 }

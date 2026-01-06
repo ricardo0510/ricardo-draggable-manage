@@ -1,17 +1,13 @@
-import React, { ReactNode } from "react";
-import "./index.scss";
+import React, { ReactNode } from 'react'
+import './index.scss'
 
 interface PageContainerProps {
-  title?: string;
-  extra?: ReactNode;
-  children: ReactNode;
+  title?: string
+  extra?: ReactNode
+  children: ReactNode
 }
 
-const PageContainer: React.FC<PageContainerProps> = ({
-  title,
-  extra,
-  children,
-}) => {
+const PageContainer: React.FC<PageContainerProps> = ({ title, extra, children }) => {
   return (
     <div className="page-container">
       {(title || extra) && (
@@ -22,7 +18,7 @@ const PageContainer: React.FC<PageContainerProps> = ({
       )}
       <div className="page-container-content">{children}</div>
     </div>
-  );
-};
+  )
+}
 
-export default PageContainer;
+export default PageContainer

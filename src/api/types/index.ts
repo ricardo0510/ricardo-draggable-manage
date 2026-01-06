@@ -1,20 +1,20 @@
 export interface ApiResponse<T = any> {
-  code: number;
-  message: string;
-  data: T;
+  code: number
+  message: string
+  data: T
 }
 
 export interface LoginParams {
-  username: string;
-  password: string;
+  username: string
+  password: string
 }
 
 export interface LoginResult {
-  token: string;
+  token: string
   userInfo: {
-    id: string;
-    username: string;
-    nickname: string;
-    avatar?: string;
-  };
+    id: string
+    username: string
+    nickname: string
+    avatar?: string
+  }
 }

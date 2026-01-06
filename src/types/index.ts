@@ -1,20 +1,20 @@
-export * from "./models/fileSystem";
+export * from './models/fileSystem'
 
 // 通用类型
 export interface ApiResponse<T = any> {
-  code: number;
-  msg: string;
-  data: T;
+  code: number
+  msg: string
+  data: T
 }
 
 export interface PaginationParams {
-  current: number;
-  pageSize: number;
+  current: number
+  pageSize: number
 }
 
 export interface PaginationResult<T> {
-  list: T[];
-  total: number;
-  current: number;
-  pageSize: number;
+  list: T[]
+  total: number
+  current: number
+  pageSize: number
 }

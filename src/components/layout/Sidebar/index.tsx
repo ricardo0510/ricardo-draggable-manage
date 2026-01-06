@@ -1,60 +1,54 @@
-import React from "react";
-import { Layout, Menu } from "antd";
-import {
-  DashboardOutlined,
-  FolderOutlined,
-  AppstoreOutlined,
-  SettingOutlined,
-} from "@ant-design/icons";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAppStore } from "@/store";
-import "./index.scss";
+import React from 'react'
+import { Layout, Menu } from 'antd'
+import { DashboardOutlined, FolderOutlined, AppstoreOutlined, SettingOutlined } from '@ant-design/icons'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useAppStore } from '@/store'
+import './index.scss'
 
-const { Sider } = Layout;
+const { Sider } = Layout
 
 const Sidebar: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { collapsed, setCollapsed } = useAppStore();
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { collapsed, setCollapsed } = useAppStore()
 
   const menuItems = [
     {
-      key: "/dashboard",
+      key: '/dashboard',
       icon: <DashboardOutlined />,
-      label: "仪表盘",
+      label: '仪表盘'
     },
     {
-      key: "/menu",
+      key: '/menu',
       icon: <FolderOutlined />,
-      label: "菜单管理",
+      label: '菜单管理'
     },
     {
-      key: "/file-system",
+      key: '/file-system',
       icon: <FolderOutlined />,
-      label: "文件系统",
+      label: '文件系统'
     },
     {
-      key: "/user-manage",
+      key: '/dictionary',
+      icon: <FolderOutlined />,
+      label: '字典管理'
+    },
+    {
+      key: '/user-manage',
       icon: <AppstoreOutlined />,
-      label: "用户管理",
+      label: '用户管理'
     },
     {
-      key: "/setting",
+      key: '/setting',
       icon: <SettingOutlined />,
-      label: "系统设置",
-    },
-  ];
+      label: '系统设置'
+    }
+  ]
 
   return (
-    <Sider
-      className="sidebar"
-      collapsible
-      collapsed={collapsed}
-      onCollapse={setCollapsed}
-      theme="dark"
-    >
+    <Sider className="sidebar" collapsible collapsed={collapsed} onCollapse={setCollapsed} theme="dark">
       <div className="logo">
-        <h1>{collapsed ? "AS" : "Admin System"}</h1>
+        <h1>{collapsed ? 'AS' : 'Admin System'}</h1>
       </div>
       <Menu
         theme="dark"
@@ -64,7 +58,7 @@ const Sidebar: React.FC = () => {
         onClick={({ key }) => navigate(key)}
       />
     </Sider>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar

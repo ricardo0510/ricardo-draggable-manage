@@ -1,13 +1,13 @@
 export interface LoginParams {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 export interface LoginResult {
-  access_token: string;
+  access_token: string
   user: {
-    id: string;
-    email: string;
-    role: string;
-  };
+    id: string
+    email: string
+    role: string
+  }
 }

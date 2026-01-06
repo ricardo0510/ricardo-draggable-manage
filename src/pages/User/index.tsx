@@ -1,217 +1,195 @@
-import React, { useState, useEffect } from "react";
-import {
-  Table,
-  Button,
-  Space,
-  Tag,
-  Popconfirm,
-  Input,
-  Select,
-  message,
-  Modal,
-  Form,
-} from "antd";
-import {
-  PlusOutlined,
-  SearchOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import type { ColumnsType } from "antd/es/table";
-import PageContainer from "@/components/common/PageContainer";
-import * as userServices from "./services";
-import type { User, UserQueryParams, CreateUserParams } from "./types";
-import "./index.scss";
+import React, { useState, useEffect } from 'react'
+import { Table, Button, Space, Tag, Popconfirm, Input, Select, message, Modal, Form } from 'antd'
+import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons'
+import type { ColumnsType } from 'antd/es/table'
+import PageContainer from '@/components/PageContainer'
+import * as userServices from './services'
+import type { User, UserQueryParams, CreateUserParams } from './types'
+import './index.scss'
 
 const UserManage: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
-  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false)
+  const [users, setUsers] = useState<User[]>([])
+  const [total, setTotal] = useState(0)
   const [queryParams, setQueryParams] = useState<UserQueryParams>({
     page: 1,
-    pageSize: 10,
+    pageSize: 10
     // sortBy: "createdAt",
     // sortOrder: "desc",
-  });
-  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [form] = Form.useForm();
+  })
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([])
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [form] = Form.useForm()
 
   useEffect(() => {
-    loadUsers();
-  }, [queryParams]);
+    loadUsers()
+  }, [queryParams])
 
   const loadUsers = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const result = await userServices.getUserList(queryParams);
-      setUsers(result.data);
-      setTotal(result.total);
+      const result = await userServices.getUserList(queryParams)
+      setUsers(result.data)
+      setTotal(result.total)
     } catch (error: any) {
-      message.error(error.message || "加载用户列表失败");
+      message.error(error.message || '加载用户列表失败')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleSearch = (value: string) => {
-    setQueryParams({ ...queryParams, page: 1, email: value });
-  };
+    setQueryParams({ ...queryParams, page: 1, email: value })
+  }
 
   const handleRoleFilter = (value: string) => {
     setQueryParams({
       ...queryParams,
       page: 1,
-      role: value === "all" ? undefined : value,
-    });
-  };
+      role: value === 'all' ? undefined : value
+    })
+  }
 
   const handleTableChange = (pagination: any) => {
     setQueryParams({
       ...queryParams,
       page: pagination.current,
-      pageSize: pagination.pageSize,
-    });
-  };
+      pageSize: pagination.pageSize
+    })
+  }
 
   const handelCreate = () => {
-    setEditingUser(null);
-    form.resetFields();
-    setIsModalOpen(true);
-  };
+    setEditingUser(null)
+    form.resetFields()
+    setIsModalOpen(true)
+  }
 
   const handleEdit = (user: User) => {
-    setEditingUser(user);
+    setEditingUser(user)
     form.setFieldsValue({
       email: user.email,
-      role: user.role,
-    });
-    setIsModalOpen(true);
-  };
+      role: user.role
+    })
+    setIsModalOpen(true)
+  }
 
   const handleDelete = async (id: string) => {
-    setLoading(true);
+    setLoading(true)
     try {
-      await userServices.deleteUser(id);
-      message.success("删除成功");
-      loadUsers();
+      await userServices.deleteUser(id)
+      message.success('删除成功')
+      loadUsers()
     } catch (error: any) {
-      message.error(error.message || "删除失败");
+      message.error(error.message || '删除失败')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleBatchDelete = async () => {
     if (selectedRowKeys.length === 0) {
-      message.warning("请选择要删除的用户");
-      return;
+      message.warning('请选择要删除的用户')
+      return
     }
-    setLoading(true);
+    setLoading(true)
     try {
-      await userServices.batchDeleteUsers({ ids: selectedRowKeys });
-      message.success(`成功删除 ${selectedRowKeys.length} 个用户`);
-      setSelectedRowKeys([]);
-      loadUsers();
+      await userServices.batchDeleteUsers({ ids: selectedRowKeys })
+      message.success(`成功删除 ${selectedRowKeys.length} 个用户`)
+      setSelectedRowKeys([])
+      loadUsers()
     } catch (error: any) {
-      message.error(error.message || "批量删除失败");
+      message.error(error.message || '批量删除失败')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleModalOk = async () => {
     try {
-      const values = await form.validateFields();
-      setLoading(true);
+      const values = await form.validateFields()
+      setLoading(true)
 
       if (editingUser) {
         // 更新用户
-        const updateData: Partial<User> = { role: values.role };
+        const updateData: Partial<User> = { role: values.role }
         if (values.password) {
-          updateData.password = values.password;
+          updateData.password = values.password
         }
-        await userServices.updateUser(editingUser.id, updateData);
-        message.success("更新成功");
+        await userServices.updateUser(editingUser.id, updateData)
+        message.success('更新成功')
       } else {
         // 创建用户
         const createData: CreateUserParams = {
           email: values.email,
           password: values.password,
-          role: values.role || "user",
-        };
-        await userServices.createUser(createData);
-        message.success("创建成功");
+          role: values.role || 'user'
+        }
+        await userServices.createUser(createData)
+        message.success('创建成功')
       }
 
-      setIsModalOpen(false);
-      loadUsers();
+      setIsModalOpen(false)
+      loadUsers()
     } catch (error: any) {
       if (error.errorFields) {
         // 表单验证错误
-        return;
+        return
       }
-      message.error(error.message || "操作失败");
+      message.error(error.message || '操作失败')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const columns: ColumnsType<User> = [
     {
-      title: "邮箱",
-      dataIndex: "email",
-      key: "email",
+      title: '邮箱',
+      dataIndex: 'email',
+      key: 'email',
       render: (email: string) => (
         <Space>
           <UserOutlined />
           {email}
         </Space>
-      ),
+      )
     },
     {
-      title: "角色",
-      dataIndex: "role",
-      key: "role",
+      title: '角色',
+      dataIndex: 'role',
+      key: 'role',
       width: 120,
       render: (role: string) => {
         const colorMap: Record<string, string> = {
-          admin: "red",
-          developer: "blue",
-          user: "default",
-        };
-        return <Tag color={colorMap[role]}>{role.toUpperCase()}</Tag>;
-      },
+          admin: 'red',
+          developer: 'blue',
+          user: 'default'
+        }
+        return <Tag color={colorMap[role]}>{role.toUpperCase()}</Tag>
+      }
     },
     {
-      title: "创建时间",
-      dataIndex: "createdAt",
-      key: "createdAt",
+      title: '创建时间',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
       width: 180,
-      render: (time: string) => new Date(time).toLocaleString("zh-CN"),
+      render: (time: string) => new Date(time).toLocaleString('zh-CN')
     },
     {
-      title: "更新时间",
-      dataIndex: "updatedAt",
-      key: "updatedAt",
+      title: '更新时间',
+      dataIndex: 'updatedAt',
+      key: 'updatedAt',
       width: 180,
-      render: (time: string) => new Date(time).toLocaleString("zh-CN"),
+      render: (time: string) => new Date(time).toLocaleString('zh-CN')
     },
     {
-      title: "操作",
-      key: "actions",
+      title: '操作',
+      key: 'actions',
       width: 150,
-      fixed: "right",
+      fixed: 'right',
       render: (_, record: User) => (
         <Space size="small">
-          <Button
-            type="link"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
+          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
             编辑
           </Button>
           <Popconfirm
@@ -225,20 +203,16 @@ const UserManage: React.FC = () => {
             </Button>
           </Popconfirm>
         </Space>
-      ),
-    },
-  ];
+      )
+    }
+  ]
 
   return (
     <PageContainer
       title="用户管理"
       extra={
         <Space>
-          <Button
-            danger
-            disabled={selectedRowKeys.length === 0}
-            onClick={handleBatchDelete}
-          >
+          <Button danger disabled={selectedRowKeys.length === 0} onClick={handleBatchDelete}>
             批量删除
           </Button>
           <Button type="primary" icon={<PlusOutlined />} onClick={handelCreate}>
@@ -261,10 +235,10 @@ const UserManage: React.FC = () => {
           onChange={handleRoleFilter}
           defaultValue="all"
           options={[
-            { value: "all", label: "全部" },
-            { value: "user", label: "User" },
-            { value: "admin", label: "Admin" },
-            { value: "developer", label: "Developer" },
+            { value: 'all', label: '全部' },
+            { value: 'user', label: 'User' },
+            { value: 'admin', label: 'Admin' },
+            { value: 'developer', label: 'Developer' }
           ]}
         />
       </Space>
@@ -276,20 +250,20 @@ const UserManage: React.FC = () => {
         loading={loading}
         rowSelection={{
           selectedRowKeys,
-          onChange: setSelectedRowKeys,
+          onChange: setSelectedRowKeys
         }}
         pagination={{
           current: queryParams.page,
           pageSize: queryParams.pageSize,
           total,
           showSizeChanger: true,
-          showTotal: (total) => `共 ${total} 条`,
+          showTotal: (total) => `共 ${total} 条`
         }}
         onChange={handleTableChange}
       />
 
       <Modal
-        title={editingUser ? "编辑用户" : "新建用户"}
+        title={editingUser ? '编辑用户' : '新建用户'}
         open={isModalOpen}
         onOk={handleModalOk}
         onCancel={() => setIsModalOpen(false)}
@@ -300,8 +274,8 @@ const UserManage: React.FC = () => {
             label="邮箱"
             name="email"
             rules={[
-              { required: true, message: "请输入邮箱!" },
-              { type: "email", message: "请输入有效的邮箱地址!" },
+              { required: true, message: '请输入邮箱!' },
+              { type: 'email', message: '请输入有效的邮箱地址!' }
             ]}
           >
             <Input disabled={!!editingUser} placeholder="user@example.com" />
@@ -313,32 +287,30 @@ const UserManage: React.FC = () => {
             rules={[
               {
                 required: !editingUser,
-                message: "请输入密码!",
+                message: '请输入密码!'
               },
               {
                 min: 6,
-                message: "密码至少6位!",
-              },
+                message: '密码至少6位!'
+              }
             ]}
           >
-            <Input.Password
-              placeholder={editingUser ? "留空表示不修改密码" : "请输入密码"}
-            />
+            <Input.Password placeholder={editingUser ? '留空表示不修改密码' : '请输入密码'} />
           </Form.Item>
 
           <Form.Item label="角色" name="role" initialValue="user">
             <Select
               options={[
-                { value: "user", label: "User" },
-                { value: "admin", label: "Admin" },
-                { value: "developer", label: "Developer" },
+                { value: 'user', label: 'User' },
+                { value: 'admin', label: 'Admin' },
+                { value: 'developer', label: 'Developer' }
               ]}
             />
           </Form.Item>
         </Form>
       </Modal>
     </PageContainer>
-  );
-};
+  )
+}
 
-export default UserManage;
+export default UserManage

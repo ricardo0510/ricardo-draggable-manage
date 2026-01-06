@@ -1,0 +1,20 @@
+// Dictionary 字典管理页面样式
+.dictionary-manage {
+  .action-buttons {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .batch-form-list {
+    .ant-form-item {
+      margin-bottom: 8px;
+    }
+  }
+
+  .drawer-data-table {
+    .ant-table-wrapper {
+      margin-top: 16px;
+    }
+  }
+}

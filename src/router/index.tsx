@@ -1,35 +1,40 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
-import MainLayout from "@/components/layout/MainLayout";
-import Dashboard from "@/pages/Dashboard";
-import FileSystemManage from "@/pages/FileSystem";
-import Login from "@/pages/Login";
-import UserManage from "@/pages/User";
+import { createBrowserRouter, Navigate } from 'react-router-dom'
+import MainLayout from '@/components/layout/MainLayout'
+import Dashboard from '@/pages/Dashboard'
+import FileSystemManage from '@/pages/FileSystem'
+import Login from '@/pages/Login'
+import UserManage from '@/pages/User'
+import DictionaryManage from '@/pages/Dictionary'
 
 export const router = createBrowserRouter([
   {
-    path: "/login",
-    element: <Login />,
+    path: '/login',
+    element: <Login />
   },
   {
-    path: "/",
+    path: '/',
     element: <MainLayout />,
     children: [
       {
         index: true,
-        element: <Navigate to="/dashboard" replace />,
+        element: <Navigate to="/dashboard" replace />
       },
       {
-        path: "dashboard",
-        element: <Dashboard />,
+        path: 'dashboard',
+        element: <Dashboard />
       },
       {
-        path: "file-system",
-        element: <FileSystemManage />,
+        path: 'file-system',
+        element: <FileSystemManage />
       },
       {
-        path: "user-manage",
-        element: <UserManage />,
+        path: 'user-manage',
+        element: <UserManage />
       },
-    ],
-  },
-]);
+      {
+        path: 'dictionary',
+        element: <DictionaryManage />
+      }
+    ]
+  }
+])
