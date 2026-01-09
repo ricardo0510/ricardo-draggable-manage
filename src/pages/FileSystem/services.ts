@@ -1,37 +1,37 @@
 import { http } from '@/api/request'
-import type { FileSystemItem } from '@/types'
+import type { MarketApp, MarketAppCreateDto, MarketAppUpdateDto, MarketQueryParams } from '@/types'
 
 /**
- * 获取所有文件列表
+ * 获取应用市场列表
  */
-export const getFiles = () => {
-  return http.get<FileSystemItem[]>('/market')
+export const getMarketApps = (params?: MarketQueryParams) => {
+  return http.get<MarketApp[]>('/market', { params })
 }
 
 /**
- * 获取单个文件详情
+ * 获取单个应用详情
  */
-export const getFile = (id: string) => {
-  return http.get<FileSystemItem>(`/market/${id}`)
+export const getMarketApp = (id: string) => {
+  return http.get<MarketApp>(`/market/${id}`)
 }
 
 /**
- * 创建文件/文件夹
+ * 创建应用 (管理员)
  */
-export const createFile = (data: Partial<FileSystemItem>) => {
-  return http.post<FileSystemItem>('/market', data)
+export const createMarketApp = (data: MarketAppCreateDto) => {
+  return http.post<MarketApp>('/market', data)
 }
 
 /**
- * 更新文件
+ * 更新应用 (管理员)
  */
-export const updateFile = (id: string, data: Partial<FileSystemItem>) => {
-  return http.patch<FileSystemItem>(`/market/${id}`, data)
+export const updateMarketApp = (id: string, data: MarketAppUpdateDto) => {
+  return http.patch<MarketApp>(`/market/${id}`, data)
 }
 
 /**
- * 删除文件
+ * 删除应用 (管理员)
  */
-export const deleteFile = (id: string) => {
-  return http.delete(`/market/${id}`)
+export const deleteMarketApp = (id: string) => {
+  return http.delete<{ id: string; title: string; message: string }>(`/market/${id}`)
 }

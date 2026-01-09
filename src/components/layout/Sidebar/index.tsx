@@ -19,14 +19,9 @@ const Sidebar: React.FC = () => {
       label: '仪表盘'
     },
     {
-      key: '/menu',
-      icon: <FolderOutlined />,
-      label: '菜单管理'
-    },
-    {
       key: '/file-system',
       icon: <FolderOutlined />,
-      label: '文件系统'
+      label: '文件管理'
     },
     {
       key: '/dictionary',

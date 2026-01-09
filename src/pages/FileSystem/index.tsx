@@ -1,100 +1,89 @@
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Table, Button, Space, Tag, Popconfirm, Input, Select, message } from 'antd'
 import {
   PlusOutlined,
   SearchOutlined,
   EditOutlined,
   DeleteOutlined,
-  FolderOutlined,
   AppstoreOutlined,
   GlobalOutlined,
   LayoutOutlined
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
-import { useFileSystemStore } from '@/store'
-import { FileSystemItem, ItemType } from '@/types'
+import { MarketApp, MarketAppType, MarketQueryParams } from '@/types'
 import ItemFormModal from './components/ItemFormModal'
 import ConfigurableForm, { type FormItemConfig } from '@/components/ConfigurableForm'
 import PageContainer from '@/components/PageContainer'
-import * as fileServices from './services'
+import { useDictOptions } from '@/hooks/useDictOptions'
+import * as marketServices from './services'
 import './index.scss'
 
-const FileSystemManage: React.FC = () => {
-  const { searchTerm, filterType, setSearchTerm, setFilterType } = useFileSystemStore()
-
+const MarketManage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingItem, setEditingItem] = useState<FileSystemItem | null>(null)
+  const [editingItem, setEditingItem] = useState<MarketApp | null>(null)
   const [loading, setLoading] = useState(false)
-  const [filesList, setFilesList] = useState<FileSystemItem[]>([])
+  const [appsList, setAppsList] = useState<MarketApp[]>([])
+  const [queryParams, setQueryParams] = useState<MarketQueryParams>({})
 
-  // 加载文件列表
-  useEffect(() => {
-    loadFiles()
-  }, [])
+  const { options: categoryOptions, loading: categoryLoading } = useDictOptions('file_menu')
 
-  const loadFiles = async () => {
+  // 加载应用列表
+  const loadApps = useCallback(async (params?: MarketQueryParams) => {
     setLoading(true)
     try {
-      const files = await fileServices.getFiles()
-      setFilesList(files)
+      const apps = await marketServices.getMarketApps(params)
+      setAppsList(apps)
     } catch (error: any) {
-      message.error(error.message || '加载文件列表失败')
+      message.error(error.message || '加载应用列表失败')
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    loadApps(queryParams)
+  }, [loadApps, queryParams])
 
   // 定义表单配置项
   const formItems: FormItemConfig[] = [
     {
-      name: 'searchTerm',
+      name: 'search',
       render: (form) => (
         <Input
           prefix={<SearchOutlined />}
-          placeholder="搜索名称或ID..."
+          placeholder="搜索应用名称..."
           style={{ width: 300 }}
+          allowClear
           onBlur={(e) => {
-            form.setFieldValue('searchTerm', e.target.value)
-            form.submit() // 触发onChange
+            form.setFieldValue('search', e.target.value)
+            form.submit()
+          }}
+          onPressEnter={(e) => {
+            form.setFieldValue('search', (e.target as HTMLInputElement).value)
+            form.submit()
           }}
         />
       )
     },
     {
-      name: 'filterType',
+      name: 'category',
       render: () => (
         <Select
           style={{ width: 200 }}
-          placeholder="选择类型"
-          options={[
-            { value: 'all', label: '全部' },
-            { value: 'app', label: 'App' },
-            { value: 'folder', label: 'Folder' },
-            { value: 'web', label: 'Web' },
-            { value: 'widget', label: 'Widget' }
-          ]}
+          placeholder="选择分类"
+          allowClear
+          loading={categoryLoading}
+          options={[{ value: undefined, label: '全部分类' }, ...categoryOptions]}
         />
       )
     }
   ]
 
-  const itemsList = useMemo(() => {
-    return filesList.filter((item: FileSystemItem) => {
-      const matchesSearch =
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.id.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesType = filterType === 'all' || item.type === filterType
-      return matchesSearch && matchesType
-    })
-  }, [filesList, searchTerm, filterType])
-
-  const getIconForType = (type: ItemType) => {
+  const getIconForType = (type: MarketAppType) => {
     switch (type) {
-      case 'folder':
-        return <FolderOutlined style={{ color: '#1890ff' }} />
       case 'app':
         return <AppstoreOutlined style={{ color: '#52c41a' }} />
-      case 'web':
+      case 'link':
         return <GlobalOutlined style={{ color: '#722ed1' }} />
       case 'widget':
         return <LayoutOutlined style={{ color: '#faad14' }} />
@@ -103,13 +92,33 @@ const FileSystemManage: React.FC = () => {
     }
   }
 
-  const columns: ColumnsType<FileSystemItem> = [
+  const columns: ColumnsType<MarketApp> = [
+    {
+      title: '应用',
+      key: 'app',
+      render: (_, record: MarketApp) => (
+        <Space>
+          <img style={{ width: 40, height: 40 }} src={record.icon} alt="" />
+          <div>
+            <div style={{ fontWeight: 500 }}>{record.title}</div>
+            <div style={{ fontSize: 12, color: '#999' }}>{record.description}</div>
+          </div>
+        </Space>
+      )
+    },
+    {
+      title: '分类',
+      dataIndex: 'category',
+      key: 'category',
+      width: 120,
+      render: (category: string) => (category ? <Tag>{category}</Tag> : '-')
+    },
     {
       title: '类型',
       dataIndex: 'type',
       key: 'type',
       width: 100,
-      render: (type: ItemType) => (
+      render: (type: MarketAppType) => (
         <Space>
           {getIconForType(type)}
           <span style={{ textTransform: 'capitalize' }}>{type}</span>
@@ -117,67 +126,29 @@ const FileSystemManage: React.FC = () => {
       )
     },
     {
-      title: '名称',
-      dataIndex: 'name',
-      key: 'name',
-      render: (name: string, record: FileSystemItem) => (
-        <div>
-          <div style={{ fontWeight: 500 }}>{name}</div>
-          <div style={{ fontSize: 12, color: '#999' }}>ID: {record.id}</div>
-        </div>
-      )
+      title: '价格',
+      dataIndex: 'price',
+      key: 'price',
+      width: 100,
+      render: (price: number) => (price === 0 ? <Tag color="green">免费</Tag> : `¥${price.toFixed(2)}`)
     },
     {
-      title: '父级ID',
-      dataIndex: 'parentId',
-      key: 'parentId',
-      width: 120,
-      render: (parentId: string) => <Tag>{parentId}</Tag>
-    },
-    {
-      title: '位置',
-      key: 'position',
-      width: 120,
-      render: (_, record: FileSystemItem) => (
-        <code>
-          ({record.position?.x ?? 0}, {record.position?.y ?? 0})
-        </code>
-      )
-    },
-    {
-      title: '详情',
-      key: 'details',
-      render: (_, record: FileSystemItem) => {
-        if (record.type === 'web' && record.url) {
-          return (
-            <a href={record.url} target="_blank" rel="noreferrer">
-              {record.url}
-            </a>
-          )
-        }
-        if (record.type === 'widget') {
-          return (
-            <span>
-              {record.widgetType} ({record.size})
-            </span>
-          )
-        }
-        if (record.content) {
-          return <span style={{ color: '#999', fontSize: 12 }}>有内容</span>
-        }
-        return '-'
-      }
+      title: '安装次数',
+      dataIndex: 'installCount',
+      key: 'installCount',
+      width: 100,
+      render: (count: number) => count.toLocaleString()
     },
     {
       title: '操作',
       key: 'actions',
       width: 120,
       fixed: 'right',
-      render: (_, record: FileSystemItem) => (
+      render: (_, record: MarketApp) => (
         <Space size="small">
           <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
           <Popconfirm
-            title="确定要删除这个项目吗?"
+            title="确定要删除这个应用吗?"
             onConfirm={() => handleDelete(record.id)}
             okText="确定"
             cancelText="取消"
@@ -194,31 +165,23 @@ const FileSystemManage: React.FC = () => {
     setIsModalOpen(true)
   }
 
-  const handleEdit = (item: FileSystemItem) => {
+  const handleEdit = (item: MarketApp) => {
     setEditingItem(item)
     setIsModalOpen(true)
   }
 
-  const handleSave = async (itemData: Partial<FileSystemItem>) => {
+  const handleSave = async (itemData: Partial<MarketApp>) => {
     setLoading(true)
     try {
       if (editingItem) {
-        // 更新文件
-        await fileServices.updateFile(editingItem.id, itemData)
+        await marketServices.updateMarketApp(editingItem.id, itemData)
         message.success('更新成功')
       } else {
-        // 创建文件
-        const createData: Partial<FileSystemItem> = {
-          parentId: itemData.parentId || 'root',
-          name: itemData.name || 'Untitled',
-          type: itemData.type || 'folder',
-          ...itemData
-        }
-        await fileServices.createFile(createData)
+        await marketServices.createMarketApp(itemData as any)
         message.success('创建成功')
       }
       setIsModalOpen(false)
-      loadFiles() // 重新加载列表
+      loadApps(queryParams)
     } catch (error: any) {
       message.error(error.message || '操作失败')
     } finally {
@@ -229,9 +192,9 @@ const FileSystemManage: React.FC = () => {
   const handleDelete = async (id: string) => {
     setLoading(true)
     try {
-      await fileServices.deleteFile(id)
+      await marketServices.deleteMarketApp(id)
       message.success('删除成功')
-      loadFiles() // 重新加载列表
+      loadApps(queryParams)
     } catch (error: any) {
       message.error(error.message || '删除失败')
     } finally {
@@ -241,34 +204,33 @@ const FileSystemManage: React.FC = () => {
 
   return (
     <PageContainer
-      title="文件系统管理"
+      title="应用市场管理"
       extra={
         <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-          新建项目
+          新建应用
         </Button>
       }
     >
       <ConfigurableForm
         items={formItems}
-        initialValues={{
-          searchTerm,
-          filterType
-        }}
+        initialValues={queryParams}
         onChange={(values) => {
-          setSearchTerm(values.searchTerm || '')
-          setFilterType(values.filterType || 'all')
+          setQueryParams({
+            search: values.search || undefined,
+            category: values.category || undefined
+          })
         }}
       />
 
       <Table
         columns={columns}
-        dataSource={itemsList}
+        dataSource={appsList}
         rowKey="id"
         loading={loading}
         pagination={{
           pageSize: 10,
           showSizeChanger: true,
-          showTotal: (total) => `共 ${total} 项`
+          showTotal: (total) => `共 ${total} 个应用`
         }}
       />
 
@@ -282,4 +244,4 @@ const FileSystemManage: React.FC = () => {
   )
 }
 
-export default FileSystemManage
+export default MarketManage

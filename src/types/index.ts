@@ -1,4 +1,5 @@
 export * from './models/fileSystem'
+export * from './models/marketApp'
 
 // 通用类型
 export interface ApiResponse<T = any> {

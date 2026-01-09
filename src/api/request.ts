@@ -16,8 +16,14 @@ async function request<T = any>(url: string, config: RequestConfig = {}): Promis
   // 处理查询参数
   let fullUrl = BASE_URL + url
   if (params) {
-    const queryString = new URLSearchParams(params).toString()
-    fullUrl += `?${queryString}`
+    // 过滤掉假值（null, undefined, ''）
+    const filteredParams = Object.fromEntries(
+      Object.entries(params).filter(([, value]) => value != null && value !== '')
+    )
+    if (Object.keys(filteredParams).length > 0) {
+      const queryString = new URLSearchParams(filteredParams).toString()
+      fullUrl += `?${queryString}`
+    }
   }
 
   // 设置请求头
